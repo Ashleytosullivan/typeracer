@@ -19,6 +19,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const difficultySelect = document.getElementById('difficulty');
     const sampleTextDiv = document.getElementById('sample-text');
+    const startBtn = document.getElementById('start-btn');
+    const stopBtn = document.getElementById('stop-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const timeDisplay = document.getElementById('time');
+    const userInput = document.getElementById('user-input');
+    const levelDisplay = document.getElementById('level');
+    const wpmDisplay = document.getElementById('wpm');
+    let startTime, endTime;
 
     function getRandomText(textArray) {
         const randomIndex = Math.floor(Math.random() * textArray.length);
@@ -40,7 +48,56 @@ document.addEventListener('DOMContentLoaded', function() {
         sampleTextDiv.textContent = selectedText;
     }
 
+    function startTest() {
+        startTime = new Date();
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
+        retryBtn.disabled = true;
+        userInput.disabled = false;
+        userInput.value = ''; // Clear the user input area
+        userInput.focus(); // Focus on the user input area
+    }
+
+    function stopTest() {
+        endTime = new Date();
+        const timeTaken = (endTime - startTime) / 1000;
+        timeDisplay.textContent = timeTaken.toFixed(2);
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
+        retryBtn.disabled = false;
+        userInput.disabled = true;
+
+        // Calculate WPM
+        const sampleText = sampleTextDiv.textContent;
+        const userText = userInput.value;
+        const sampleWords = sampleText.split(' ');
+        const userWords = userText.split(' ');
+        let correctWords = 0;
+
+        for (let i = 0; i < userWords.length; i++) {
+            if (userWords[i] === sampleWords[i]) {
+                correctWords++;
+            }
+        }
+
+        const wpm = Math.round((correctWords / timeTaken) * 60);
+        wpmDisplay.textContent = wpm;
+
+        // Display difficulty level
+        levelDisplay.textContent = difficultySelect.value.charAt(0).toUpperCase() + difficultySelect.value.slice(1);
+    }
+
+    function retryTest() {
+        updateSampleText();
+        timeDisplay.textContent = '0';
+        wpmDisplay.textContent = '0';
+        userInput.disabled = true;
+    }
+
     difficultySelect.addEventListener('change', updateSampleText);
+    startBtn.addEventListener('click', startTest);
+    stopBtn.addEventListener('click', stopTest);
+    retryBtn.addEventListener('click', retryTest);
 
     // Initialize with a random text from the default difficulty level
     updateSampleText();
